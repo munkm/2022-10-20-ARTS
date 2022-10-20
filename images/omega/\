@@ -1,0 +1,542 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+
+		<title>Tools for Transformation: Computational Methods and Modeling in Nuclear Engineering</title>
+
+        <meta name="description" content="
+        A seminar given in the Nuclear Engineering and Engineering Physics at the University
+        of Wisconsin, Madison on April 15, 2019
+        
+        Computational tools are our first step to model, design, and study innovative nuclear 
+        technologies, eventually bringing these technologies to licensing and deployment. 
+        Each stage of computational tool development--from implementing numerical methods 
+        to modeling and analysis--has unique design requirements. This talk covers three different 
+        computational tools: including a coupled neutronics/structural mechanics method 
+        using MCNP and COMSOL; FW/CADIS-Ω, a hybrid method for deep-penetration neutron 
+        transport; and widgyts, a tool to interactively explore volumetric data. 
+        Each will be complemented by a discussion of how the tool both expands and 
+        provides limited insight into our data. 
+        ">
+        <meta name="author" content="Madicken Munk">
+        
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/custom.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+                    <h3>
+                        Tools for Transformation:
+                    </h3>
+                    <h4>Computational Methods and Modeling in Nuclear Engineering</h4>
+                    <br/>
+                    <h4>Madicken Munk</h4>
+                    <h4>University of Wisconsin, Madison 2019.04.15</h4>
+                </section>
+                <section>
+                    <section>
+                    <h5>About Me:</h5>
+                        <span class="fragment">
+                            <a href="https://ne.oregonstate.edu/"
+                            class="image"><img
+                            height="120"
+                            src="./images/osu_seal.png"
+                            alt="Oregon State University"
+                            frameborder="no"></a>
+                        </span>
+                        </br>
+                        <span class="fragment">
+                            <a href="http://berkeley.edu"
+                            class="image"><img
+                            height="120"
+                            src="http://www.berkeley.edu/brand/img/seals/ucbseal_139_540.png"
+                            alt="Nuclear Engineering, University of California, Berkeley"
+                            frameborder="no"></a>
+                            <a href="http://nuc.berkeley.edu"
+                            class="image"><img
+                            height="120"
+                            src="./images/ucbneutronics.png"
+                            alt="Nuclear Engineering, University of California, Berkeley"></a>
+                            <a href="https://www.ornl.gov/division/rnsd"
+                            class="image"><img
+                            height="120"
+                            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Oak_Ridge_National_Laboratory_logo.svg"
+                            alt="Radiation Transport Group, Oak Ridge National Laboratory"></a>
+                            <a href="http://bids.berkeley.edu"
+                            class="image"><img
+                            height="100"
+                            src="http://bids.berkeley.edu/sites/all/themes/bids/logo.png"
+                            alt="BIDS Logo"></a>
+                        </span>
+                        </br>
+                        <span class="fragment">
+                            <a
+                            href="http://upload.wikimedia.org/wikipedia/en/thumb/1/18/UIUC_seal.svg/1024px-UIUC_seal.svg"
+                            class="image"><img
+                            height="120"
+                            src="https://upload.wikimedia.org/wikipedia/en/a/af/University_of_Illinois_seal.svg"
+                            alt="illinois"></a>
+                            <a href="http://ncsa.illinois.edu"
+                            class="image"><img
+                            height="120"
+                            src="http://www.ncsa.illinois.edu/assets/img/logos_ncsa.png"
+                            alt="NCSA Logo"></a>
+                            <a href="https://data-exp-lab.github.io/"
+                            class="image"><img
+                            height="120"
+                            src="http://avatars1.githubusercontent.com/u/15057231?s=200&v=4"
+                            alt="DXL Logo"></a>
+                        </span>
+                    </section>
+                    <section>
+                        <h5>About Me:</h5>
+                        <span class="fragment">
+                            <a href="https://carpentries.org/" class="image">
+                                <img height="120"
+                                src="./images/capentries.png"
+                                alt="The Carpentries">
+                            </a>
+                            <a href="https://github.com/swcarpentry/git-novice" class="image">
+                                <img height="120"
+                                src="./images/Git-Logo-2Color.png"
+                                alt="git-novice">
+                            </a>
+                            <a href="https://numfocus.org/programs/diversity-inclusion" class="image">
+                                <img height="120"
+                                src="./images/disc_logo.png"
+                                alt="Disc committee">
+                            </a>
+                        </span>
+                        </br>
+                        <span class="fragment">
+                            <a href="https://scipy-school.org/" class="image">
+                                <img height="120"
+                                src="http://scipy.org/_static/images/scipycentral.png"
+                                alt="scipy school">
+                            </a>
+                            <a href="https://yt-project.org/" class="image">
+                                <img height="120"
+                                src="https://github.com/yt-project/yt/raw/master/doc/source/_static/yt_logo.png"
+                                alt="yt project">
+                            </a>
+                        </span>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <img height="500" src="http://fhr.nuc.berkeley.edu/wp-content/uploads/2013/08/WebSideRight.png">
+                    </section>
+                    <section>
+                        <h3>The PB-FHR MK-1 Design</h3>
+                        <div id="right">
+                        <img height="500" src="./images/PBFHR/RC_90cut_Neutronics.svg">
+                        </div>
+                        <div id="left">
+                            <font size="6">
+                            <li>236 MWth core</li>
+                            <li>300 C/HM fueled pebbles, 19.99% enrichment</li>
+                            <li>FLiBe coolant, enriched to 99.999 wt% Li6</li>
+                            <li>Power density 23.0 MW/$m^3$</li>
+                            <li>Buoyant pebble fuel</li>
+                            <li>Online refueling, annular core</li>
+                            <li>Central reflector houses control rod guide tubes</li>
+                            </font>
+                        </div>
+                    </section>
+                    <section>
+                        <h3>PB-FHR Central Reflector</h3>
+                        <img height="500" src="./images/PBFHR/CentralReflector_Simple.svg">
+                        <img height="500" src="./images/PBFHR/CentralReflector_Simple_Cutout.svg">
+                        <img height="500" src="./images/PBFHR/RC_90cut_Neutronics.svg">
+                    </section>
+                    <section>
+                        <h3>Central Reflector Lifetime Estimates</h3>
+                        <font size="6">
+                        <p class="fragment">Use MCNP to get the fluence data for the reflector</p>
+                        <p class="fragment"><b>&#8595;</b></p>
+                        <p class="fragment">Use fluence and experimental data to calculate radiation-induced strain</p>
+                        <p class="fragment"><b>&#8595;</b></p>
+                        <p class="fragment">Use strain calculation to impose a pseudo-temperature distribution in FEM</p>
+                        <p class="fragment"><b>&#8595;</b></p>
+                        <p class="fragment">Use FEM and fluence buildup to determine lifetime</p>
+                        </font>
+                    </section>
+                    <section>
+                        <h3>Implementing Radiation-Induced Swelling</h3>
+                        \[
+                        \begin{align}
+                        \epsilon_{inel} &= \alpha (T-T_{reference}) \\
+                        \epsilon_{inel} &= \epsilon_{radiation swelling} \\
+                        T &= \frac{\epsilon_{rad swelling}}{\alpha} + T_{reference}
+                        \end{align}
+                        \]
+                    </section>
+                    <section>
+                        <h3>Central Reflector Lifetime Estimates</h3>
+                        <img height="500" src="./images/PBFHR/StressMises.gif">
+                    </section>
+                    <section>
+                        <h3>PB-FHR Central Reflector</h3>
+                        <ul>
+                        <img height="500" src="./images/PBFHR/CentralReflector_Simple_Cutout.svg">
+                        <b>&#8594;</b>
+                        <img height="500" src="./images/PBFHR/CentralReflector_solid_detail.svg">
+                        <img height="500" src="./images/PBFHR/CentralReflector_explode_detail.svg">
+                        <img height="150" src="./images/PBFHR/CentralReflector_single_detail.svg">
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Key Takeaways from the Lifetime Estimate</h3>
+                        <ul><font size="6">
+                            <li>Monolithic central reflector has <font color="red">prohibitively short lifetime</font> of 8 months</li>
+                            <li>The method is <font color="red">limited in scope</font> (it doesn't incorporate buoyant load or creep effects)</li>
+                            <li>Coupling neutronics/structural mechanics provides <font color="green">design insight</font> worth incorporating</li>
+                            </font>
+                        </ul>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h3>Why hybrid methods?</h3>
+                        <ul>
+                            <font size="6">
+                            <ul class="fragment">
+                                <li>Radiation shielding is important</li>
+                                <li>"Analog" Monte Carlo methods for these problems is not ideal
+                                    <ul>
+                                        <li>Lots of particles <b>&#8594;</b> good statistics</li>
+                                        <li>Good shielding <b>&#8594;</b> very few particles</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="fragment">
+                                <li>Hybrid methods leverage deterministic methods to reduce the time to convergence for Monte Carlo simulations</li>
+                            </ul>
+                            <ul class="fragment">
+                                <li>A number of shielding problems have strong angular anisotropies</li>
+                                <ul>
+                                    <li>The importance of a particle varies with direction</li>
+                                    <li>Tracking in a low importance direction is inefficient</li>
+                                </ul>
+                            </ul>
+                            </font>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>Hybrid Methods</h3>
+                        <ul>
+                            <li>Deterministic solution used to create importance map</li>
+                            <li>Importance map <b>&#8594;</b> Monte Carlo <b>&#8594;</b> Improves solution, reduces time</li>
+                            <li>Importance: contribution to a tally</li>
+                            <li>Common solution: use deterministic solution to adjoint equation for importance map.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <small>
+                        <p>The Forward Neutron Transport Equation</p>
+                        \[
+                        \begin{multline}
+                        \hat\Omega \cdot \nabla \psi
+                                (\vec {r} ,E,\:\hat\Omega)+\Sigma _{ t }
+                                (\vec{r},E)\psi (\vec { r } ,E,\:\hat\Omega) = \\
+                                \int _{ 4\pi  } \int _{ 0 }^{ \infty  } \Sigma _{ s }(E'\rightarrow E,
+                                \hat\Omega'\rightarrow\hat\Omega)\psi (\vec { r } ,E',\: \hat\Omega')dE'
+                                \:d\hat\Omega' + q_{e}(\vec { r } ,E, \:\hat\Omega),
+                        \end{multline}
+                        \]
+                        <p>The Adjoint Neutron Transport Equation</p>
+                        \[
+                        \begin{multline}
+                        \hat\Omega \cdot \nabla \psi^{\dagger}
+                                (\vec {r} ,E,\:\hat\Omega)+\Sigma _{ t }
+                                (\vec{r},E)\psi^{\dagger}  (\vec { r } ,E,\:\hat\Omega)
+                               = \\
+                                \int _{ 4\pi  } \int _{ 0 }^{ \infty  } \Sigma _{ s }(E\rightarrow E',
+                                \hat\Omega\rightarrow\hat\Omega')\psi^{\dagger}  (\vec { r } ,E',\:
+                                \hat\Omega')dE' \:d\hat\Omega' + q_{e}^\dagger(\vec { r } ,E,
+                                \:\hat\Omega),
+                        \end{multline}
+                        \]
+                        <p>The adjoint solution can be used to make an importance map for a desired outcome</p>
+                        <p>An exact adjoint solution can be used to obtain a zero variance Monte Carlo solution</p>
+                        </small>
+                    </section>
+                    <section>
+                        <h3>Importance and the Adjoint</h3>
+                        <small>
+                            <p align="left">Notation:</p>
+                            $\langle ab \rangle = \int a(P)b(P) dP$
+                            <p align="left">Detector response</p>
+                            $
+                            \begin{align}
+                            R &= \langle \sigma_d \psi \rangle \\
+                              &= \langle q^{\dagger} \psi \rangle \\
+                              &= \langle q \psi^{\dagger} \rangle \\
+                              \end{align}
+                            $
+                            <p align="left">Point source</p>
+                            $q ( \vec{r}, E, \hat{\Omega}) = \delta(\vec{r}-\vec{r_0})\delta(\vec{E}-\vec{E_0})\delta(\vec{\hat{\Omega}}-\vec{\hat{\Omega}_0})$
+                            <font color="green"><p align="left">Response = Adjoint Flux</p>
+                            $R = \psi^{\dagger} (r_0, E_0, \Omega_0)$
+                            </font>
+                        </small>
+                    </section>
+                    <section>
+                        <h3>The CADIS method</h3>
+                        <div id="left">
+                            <p>Biased source distribution</p>
+                            <p>Starting weight of the particles</p>
+                            <p>Weight window target values</p>
+                        </div>
+                        <div id="right">
+                            $\\ \hat{q}(\vec{r},E) = \frac{\phi^{\dagger}(\vec{r},E)q(\vec{r},E)}{R} \\$
+                            </br>
+                            $\\ w_{0}(\vec{r},E) = \frac{q(\vec{r},E)}{\hat{q}(\vec{r},E)} = \frac{R}{\phi^{\dagger}(\vec{r},E)} \\$
+                            </br>
+                            $\\ w(\vec{r},E) = \frac{R}{\phi^{\dagger}(\vec{r},E)}$
+                        </div>
+                    </section>
+                    <section>
+                        <h3>Angle isn't captured</h3>
+                    </section>
+                    <section>
+                        <h2>The $\Omega$ Flux</h2>
+                        \[
+                        \phi^{\dagger}_{\Omega}(\vec{r},E) = 
+                        \frac{\int{\psi (\vec{r}, E, \hat{\Omega}) \psi^{\dagger} (\vec{r}, E, \hat{\Omega})}d \hat{\Omega}}
+                        {\int{\psi (\vec{r}, E, \hat{\Omega}) d \hat{\Omega}}} 
+                        \]
+                        <ul>
+                            <li class="fragment">Uses angular flux <b>&#8594;</b><font color="green"> More angular information is captured in importance map</font></li>
+                            <li class="fragment">Generates scalar flux <b>&#8594;</b><font color="green"> Can be used in existing methods</font></li>
+                            <li class="fragment">Weights by the forward flux <b>&#8594;</b><font color="green"> Direction of particle flow is captured</font></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <div id="left">
+                            <img height="500" src="./images/omega/maze2geom.png">
+                        </div>
+                        <div id="right">
+                            <ul><font size="6">
+                            <li>Point source</li>
+                            <li>NaI detector, concrete barrier</li>
+                            <li>Vacuum boundary conditions</li>
+                            <li>NaI reaction rate with track length tally (f4)</li>
+                            <li>Tally energy binning consistent with XS library</li>
+                            <li>27g19n XS library, QR quadrature, SC solver, P$_N$ order 3</li>
+                            </font></ul>
+                        </div>
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <div id="left">
+                            <img height="400" src="./images/omega/maze2MfwdG00.png">
+                        </div>
+                        <div id="right">
+                            <img height="400" src="./images/omega/maze2MadjG00.png">
+                        </div>
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <img height="500" src="./images/omega/maze2McontribG00.png"> 
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <div id="left">
+                            <img height="400" src="./images/omega/maze2MadjG00.png">
+                        </div>
+                        <div id="right">
+                            <img height="400" src="./images/omega/maze2MomegaG00.png">
+                        </div>
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <div id="left">
+                            <img height="350" src="./images/omega/maze_2_tally_result_compare.png">
+                        </div>
+                        <div id="right">
+                            <img height="350" src="./images/omega/maze_2_tally_error_compare.png">
+                        </div>
+                    </section>
+                    <section>
+                        <h2>A Simple Labyrinth</h2>
+                        <div id="left">
+                            <img height="150" src="./images/omega/maze2FOMS.png">
+                        </div>
+                        <div id="right">
+                            <img height="200" src="./images/omega/maze2time.png">
+                        </div>
+                    </section>
+                    <section>
+                        <h3>Key Takeaways from the $\Omega$-methods</h3>
+                        <ul><font size="6">
+                            <li>Captures problem physics more effectively by weighting the adjoing by the forward flux</li>
+                            <li>Demonstrates an ability to <font color="green">reduce uncertainty</font> in anisotropic energy groups of f4 energy tally</li>
+                            <li>Has <font color="green">stronger performance than CADIS</font> for many problems.</li>
+                            <li>Exhibits a <font color="blue">dampening of ray effects</font> in regions where the forward and adjoint are perpindicular</li>
+                            <li>Effectively <font color="green">captures streaming behavior</font></li>
+                            <li>Does not completely <font color="red">negate low-importance regions</font></li>
+                            </font>
+                        </ul>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        Widgyts
+                    </section>
+                </section>
+                <section>
+                    <section>
+                        <h2>Moving Forward</h2>
+                        <ul>
+                        <li>multiphysics</li>
+                        <li>hybrid methods</li>
+                        <li>open, reproducible analysis</li>
+                        </ul>
+                    </section>
+                </section>
+                <section>
+                    <section>
+                    <div id="left">
+                        <h4>Acknowledgements</h4>
+                    </div>
+                    <div id="right">
+                        <small>
+                    <ul>
+                        <ul class="fragment">
+                    <li>Matthew Turk</li>
+                    <li>Rachel Slaybaugh</li>
+                         </ul>
+                        <ul class="fragment">
+                    <li>Tara Pandya</li>
+                    <li>Seth Johnson</li>
+                    <li>Steven Hamilton</li>
+                    <li>Garret Baltz</li>
+                    <li>David Krumweide</li>
+                    <li>Nathan Goldbaum</li>
+                        </ul>
+                        <ul class="fragment">
+		            <li>Britton Smith</li>
+		            <li>Katy Huff</li>
+		            <li>Patricia Schuster</li>
+		            <li>Denia Djokic</li>
+		            <li>Lakshana Huddar</li>
+		            <li>Ehud Greenspan</li>
+                    </ul>
+                    </ul>
+                        </small>
+                    </div>
+                    </section>
+				    <section data-background-image="http://longwallpapers.com/Desktop-Wallpaper/space-cat-background-For-Desktop-Wallpaper.jpg" style="background: rgba(255, 255, 255, 0.80);">
+                    <h3>Thank You!</h3>
+                    <h4>Madicken Munk</h4>
+                    <font size="5">twitter:@munkium &nbsp; &nbsp; &nbsp; &nbsp; github:@munkm
+                    <br/>
+                    <a href="https://munkm.github.io/2019-04-15-UW">https://munkm.github.io/2019-04-15-UW</a>
+                    <br/>
+                    </font>
+                    <font size="5"><b>This publication is supported in part by the 
+                      Gordon and Betty Moore
+                      Foundation's Data-Driven Discovery Initiative through Grant GBMF4561 to
+                      Matthew Turk and by the Department of Energy under award number
+                      DE-NE0008286 to Rachel Slaybaugh.</b></font>
+                    </br>
+                    <font size="4">
+                        <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Tools for Transformation: Computational Methods and Modeling in Nuclear Engineering</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://munkm.github.io" property="cc:attributionName" rel="cc:attributionURL">Madicken Munk</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://munkm.github.io/2019-04-15-UW" rel="dct:source">http://munkm.github.io/2019-04-15-UW</a>.
+                    </font>
+                </section>
+                </section>
+                <section>
+                    <section>
+                        Backup Slides
+                    </section>
+                    <section>
+                        Backup Slides
+                        <br/>
+                        Research Idea
+                    </section>
+                    <section data-background-iframe="https://discover-cookbook.numfocus.org" 
+                        data-background-interactive>
+                    </section>
+                    <section data-background-iframe="http://swcarpentry.github.io/git-novice/" 
+                        data-background-interactive>
+                    </section>
+                    <section data-background-iframe="https://jhepc.github.io/gallery.html" 
+                        data-background-interactive>
+                    </section>
+                    <section>
+                        Backup Slides: Ar/Ar Geochronology
+                    </section>
+                    <section>
+                        Backup Slides: Mo production in the OSU TRIGA reactor
+                    </section>
+                    <section>
+                        Backup Slides
+                    </section>
+                    <section>
+                        Backup Slides
+                    </section>
+                </section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+            Reveal.initialize({
+                    controls: true,
+                    progress: true,
+                    history: true,
+                    center: true,
+            
+                    theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                    transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+            
+                    // Parallax scrolling
+                    // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                    // parallaxBackgroundSize: '2100px 900px',
+            
+                    // Optional libraries used to extend on reveal.js
+                    math: {
+                            mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js',
+                            config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+                        },
+                    dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/math/math.js', async: true }
+                    ]
+            });
+		</script>
+	</body>
+</html>
